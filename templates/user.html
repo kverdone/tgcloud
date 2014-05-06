@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>TG Cloud</title>
+		<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+		<script src="{{ url_for('static', filename='js/d3.layout.cloud.js') }}"></script>
+	</head>
+	<body>
+		<h1>TG Cloud</h1>
+		<script>
+		
+		var dataset = [];
+
+		var fontSize = d3.scale.log().range([10,90]);
+
+		var fill = d3.scale.category20();
+
+		var mycloud = d3.layout.cloud().size([600,600])
+						.words(dataset)
+						.padding(2)
+						.rotate(function() {
+							return ~~(Math.random() * 2) * 90;
+						})
+						.font("Helvetica")
+						.fontSize(function(d) {
+							return fontSize(d.count);
+						})
+						.on("end", draw);
+
+		function draw(dataset) {
+	        //fade existing tag cloud out
+	        d3.select("body").selectAll("svg").selectAll("g")
+	            .transition()
+	                .duration(1000)
+	                .style("opacity", 1e-6)
+	                .remove();
+
+	        //render new tag cloud
+	        d3.select("body").selectAll("svg")
+	            .append("g")
+	                 .attr("transform", "translate(300,300)")
+	                .selectAll("text")
+	                .data(dataset)
+	            .enter().append("text")
+	            .style("font-size", function(d) { return ((d.count)* 1) + "px"; })
+	            .style("font-family", "Helvetica")
+	            .style("fill", function(d, i) { return fill(i); })
+	            .style("opacity", 1e-6)
+	            .attr("text-anchor", "middle")
+	            .attr("transform", function(d) { return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")"; })
+	            .transition()
+	            .duration(1000)
+	            .style("opacity", 1)
+	            .text(function(d) { return d.word; });
+	      };
+
+
+	    function get_words() {
+			d3.csv("{{ url_for('static', filename=username + '.csv') }}", function(csv, error) {
+
+				if(error) {
+					return console.warn(error);
+				};
+
+				dataset = csv;
+
+				mycloud.stop().words(dataset).start();
+
+			});
+
+
+		};
+
+		d3.select("body").append("svg")
+						.attr("height", 600)
+						.attr("width", 600);
+
+		get_words();
+
+
+
+
+
+		</script>
+	</body>
+</html>
