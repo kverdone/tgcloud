@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>TG Cloud</title>
+	</head>
+	<body>
+		<h1>Recent Entries for {{ username }}</h1>
+		<p>Entries:</p>
+		<ul>
+			{% for item in entries %}
+				<li>{{ item }}</li>
+			{% endfor %}
+		</ul>
+	</body>
+</html>
