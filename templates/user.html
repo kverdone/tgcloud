@@ -89,9 +89,10 @@
 
                 
                 // Scale for the font size
-                var size = d3.scale.sqrt()
-                            .domain([d3.min(dataset, function(d) {return d.count;}) , d3.max(dataset, function(d) {return d.count;}) ])
-                            .range([10,65]);
+                var size = d3.scale.pow()
+                            .domain(d3.extent(dataset, function(d) {return d.count;}))
+                            .rangeRound([10,65])
+                            .clamp(true);
 
                 // Size of the SVG
                 var dim = 800;
@@ -123,7 +124,7 @@
                         .attr("transform", function(d) {
                             x = Math.random() >= .5 ? rand(-500,-150): rand(900, 1400);
                             y = Math.random() >= .5 ? rand(-500,-150): rand(900, 1400);
-                            var deg = Math.random() > .2 ? 0 : -90;
+                            var deg = Math.random() > .25 ? 0 : -90;
                             d["x"] = x;
                             d["y"] = y;
                             d["deg"] = deg;                        
