@@ -8,79 +8,307 @@
 	<body>
 		<h1>TG Cloud</h1>
 		<script>
-		
-		var dataset = [];
+            
+            dataset = [];
+            path = "{{ url_for('static', filename=username + '.csv') }}";
+            
+            //read_test_data(25, dataset);
+            read_csv_data(0, dataset, path);
+            /*console.log("read_data: ", dataset);
+            initial_text_placement(dataset);
+            console.log("initial_text_placement: ", dataset);
+            determine_text_boundaries(dataset);
+            console.log("determine_text_boundaries: ", dataset);
+            cloud_placement_algorithm(dataset, 0);
+            console.log("cloud_placement_algorithm: ", dataset);
+            finalize_text_placement(dataset);
+            console.log("finalize_text_placement: ", dataset);*/
+            
+            function read_test_data(len, dataset) {
+                // Example Word List
+                var word_list = ['chicken', 'steak', 'bread',
+                             'salad', 'protein', 'whale',
+                             'nutella', 'banana', 'squid',
+                             'rice', 'pasta', 'ostrich',
+                             'rhino', 'pita', 'lemon',
+                             'pie', 'chocolate', 'apple',
+                             'burger', 'icecream', 'fruit', 
+                             'grain', 'oats', 'whey', 'casein'];
+                 
+                 /*var dataset = [];*/
+                 
+                // Create the dataset using items from the list and a random size
+                for(i=0; i < len; i++) {
 
-		var fontSize = d3.scale.log().range([10,90]);
+                    var obj = {'word': word_list[i],
+                               'count': rand(10,55)};
 
-		var fill = d3.scale.category20();
+                    dataset.push(obj);
+                };
+                
+                return dataset;
+            
+            };
+            
+            function read_csv_data(len, dataset, path) {
+                d3.csv(path, function(error, data) {
+                    console.log(data);
 
-		var mycloud = d3.layout.cloud().size([600,600])
-						.words(dataset)
-						.padding(2)
-						.rotate(function() {
-							return ~~(Math.random() * 2) * 90;
-						})
-						.font("Helvetica")
-						.fontSize(function(d) {
-							return fontSize(d.count);
-						})
-						.on("end", draw);
+                    dataset = data;
+                    /*data.forEach(function(d) {
+                        obj = {'word': d.word,
+                               'count': d.count};
+                        dataset.push(obj);
+                    }); */
+                    console.log("read_data: ", dataset);
+                    initial_text_placement(dataset);
+                    console.log("initial_text_placement: ", dataset);
+                    determine_text_boundaries(dataset);
+                    console.log("determine_text_boundaries: ", dataset);
+                    cloud_placement_algorithm(dataset, 0);
+                    console.log("cloud_placement_algorithm: ", dataset);
+                    finalize_text_placement(dataset);
+                    console.log("finalize_text_placement: ", dataset);
+                });
+                
+                return dataset;
+                       
+            };
+            
+            // Returns a number between the two parameters
+            function rand(from, to) {
+                return Math.floor(Math.random() * (to - from + 1) + from);  
+            };
+            
+            
+            function initial_text_placement(dataset) {
+                // List of Official TG Colors
+                var color_list = ['#407db5', '#e67e22',
+                                  '#27ae60', '#8e44ad',
+                                  '#e74c3c'];
 
-		function draw(dataset) {
-	        //fade existing tag cloud out
-	        d3.select("body").selectAll("svg").selectAll("g")
-	            .transition()
-	                .duration(1000)
-	                .style("opacity", 1e-6)
-	                .remove();
+                
+                // Scale for the font size
+                var size = d3.scale.sqrt()
+                            .domain([d3.min(dataset, function(d) {return d.count;}) , d3.max(dataset, function(d) {return d.count;}) ])
+                            .range([10,65]);
 
-	        //render new tag cloud
-	        d3.select("body").selectAll("svg")
-	            .append("g")
-	                 .attr("transform", "translate(300,300)")
-	                .selectAll("text")
-	                .data(dataset)
-	            .enter().append("text")
-	            .style("font-size", function(d) { return ((d.count)* 1) + "px"; })
-	            .style("font-family", "Helvetica")
-	            .style("fill", function(d, i) { return fill(i); })
-	            .style("opacity", 1e-6)
-	            .attr("text-anchor", "middle")
-	            .attr("transform", function(d) { return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")"; })
-	            .transition()
-	            .duration(1000)
-	            .style("opacity", 1)
-	            .text(function(d) { return d.word; });
-	      };
+                // Size of the SVG
+                var dim = 800;
+
+                svg = d3.select("body")
+                        .append("svg")
+                        .attr("height", dim)
+                        .attr("width", dim);
+
+                // Background color, messes with checking bounding boxes
+                svg.append("rect")
+                        .attr("width", "100%")
+                        .attr("height", "100%")
+                        .attr("fill", "#e0e0e0");
+
+                // Create Text elements in random locations offscreen
+                // Determine if it should be rotated
+                // Add an ID and a color from the list
+                text = svg.selectAll("text")
+                        .data(dataset)
+                        .enter()
+                        .append("text")
+                        .text(function(d) {
+                            return d.word.toUpperCase();
+                        })
+                        .attr("font-size", function(d) {
+                            return size(d.count);
+                        })
+                        .attr("transform", function(d) {
+                            x = Math.random() >= .5 ? rand(-500,-150): rand(900, 1400);
+                            y = Math.random() >= .5 ? rand(-500,-150): rand(900, 1400);
+                            var deg = Math.random() > .2 ? 0 : -90;
+                            d["x"] = x;
+                            d["y"] = y;
+                            d["deg"] = deg;                        
+
+                            return "translate(" + x + "," + y + ")rotate(" + deg + ")";
+                        })
+                        .attr("id", function(d) { 
+                            return d.word;
+                        })
+                        .attr("fill", function(d,i) {
+                            return color_list[i%5];
+                        })
+                        /*.attr("font-family", "comfortaa")
+                        .attr("font-weight", 300)
+                        })*/;
+                
+                return dataset;
+                
+            };
+            
+            
+            function determine_text_boundaries(dataset) {
+                
+                text = d3.selectAll("text");
+                
+                text.each(function(d,i) {
+                    var box = this.getBoundingClientRect();
+                    /*console.log(d.word, box);*/
+                    var padding = 8;
+
+                    if(d.deg === 0) {
+                        d["height"] = Math.round(box.height * .6);
+                        d["width"] = box.width;
+                    } else {
+                        d["height"] = box.height;
+                        d["width"] = Math.round(box.width * .6);
+                    };
+                    d["T"] = box.top;
+                    d["B"] = box.bottom;
+                    d["L"] = box.left;
+                    d["R"] = box.right;
+                });
+
+                return dataset;
+            };
+            
+            
+            function cloud_placement_algorithm(dataset, alg) {
+                switch(alg) {
+                    case 0:
+                        return rectangular_spiral(dataset);
+                        break;
+                    case 1:
+                        return archimedean_spiral(dataset);
+                        break;
+                    case 2:
+                        return random_placement(dataset);
+                        break;
+                    default:
+                        return rectangular_spiral(dataset);
+                        break;
+                };
+                
+                return dataset;
+            };
+            
+            function rectangular_spiral(dataset) {
+                // Rectangular Spiral Placement Algorithm
+                // Outermost loop iterates through each item
+                // Second loop picks locations along the spiral
+                // Innermost loop checks the location against the
+                // Current locations of all other Text elements
+                
+                failed = [];
+                dim = d3.select("svg").node().getBoundingClientRect().width;
+                
+                for(i=0; i < dataset.length; i++) {
+                    var x = 0;
+                    var y = 0;
+                    var X = 80;
+                    var Y = 80;
+                    var dx = 0;
+                    var dy = -1;
+                    loops = Math.pow(Math.max(X,Y),2);
+
+                    for(j=0; j < loops; j++) {
+
+                        var collision = false;
+
+                        if((-X/2 < x && x <= X/2) && (-Y/2 < y && y <= Y/2)) {
+                            var xpos = dim * .4 + x * 5;
+                            var ypos = dim * .6 + y * 5;
+                            dataset[i].x = xpos;
+                            dataset[i].y = ypos;
+                            dataset[i].T = ypos - dataset[i].height;
+                            dataset[i].B = ypos;
+                            dataset[i].L = xpos;
+                            dataset[i].R = xpos + dataset[i].width;
+
+                        };
 
 
-	    function get_words() {
-			d3.csv("{{ url_for('static', filename=username + '.csv') }}", function(csv, error) {
-
-				if(error) {
-					return console.warn(error);
-				};
-
-				dataset = csv;
-
-				mycloud.stop().words(dataset).start();
-
-			});
+                        if(x===y || (x < 0 && x===-y) || (x > 0 && x===1-y)) {
+                            var temp = -dy;
+                            dy = dx;
+                            dx = temp;
+                        };
 
 
-		};
+                        for(k=0; k < dataset.length; k++) {
+                            if(k===i) {
+                                continue;
+                            };
+                            if(check_rectangle_intersect(dataset[i], dataset[k])) {
+                                collision = true;
+                                break;
+                            };
+                        };
 
-		d3.select("body").append("svg")
-						.attr("height", 600)
-						.attr("width", 600);
+                        if(j === (loops - 1)) {
+                            dataset[i].x = -500;
+                            dataset[i].y = -500;
+                            failed.push(dataset[i]);
+                        };
 
-		get_words();
+                        x+= dx;
+                        y+= dy;
 
+                        if(collision) {
+                            collision = false;
+                            continue;
+                        } else {
+                            break;
+                        };
 
+                    };
+                };
+                
+                console.log("Failed Placements: ", failed.length, ": ", failed);
+                return dataset;
+                
+            };
 
-
-
-		</script>
+            
+            
+            function archimedean_spiral(dataset) {
+                return dataset;
+            };
+            function random_placement(dataset) {
+                return dataset;
+            };
+            
+            
+            
+            function check_rectangle_intersect(rectA, rectB) {
+                // Function to check intersection of two bounding boxes  
+                return !(rectB.L > rectA.R ||
+                         rectB.R < rectA.L ||
+                         rectB.T > rectA.B ||
+                         rectB.B < rectA.T);
+            };
+            
+            
+            function finalize_text_placement(dataset) {
+                // Update and transition Text Elements to their proper locations
+                
+                svg = d3.select("svg");
+                
+                svg.selectAll("text")
+                        .data(dataset)
+                        .transition()
+                        .delay(function(d,i) {return i/10 * 100;})
+                        .duration(1000)
+                        .attr("transform", function(d) {
+                            if(d.deg) {
+                                newX = d.x + d.width;
+                            } else {
+                                newX = d.x;
+                            };
+                            return "translate(" + newX + "," + d.y + ")rotate(" + d.deg + ")";
+                        });
+                
+                return dataset;
+            };
+  
+        </script>
 	</body>
 </html>
