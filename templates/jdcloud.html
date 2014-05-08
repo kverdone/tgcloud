@@ -1,0 +1,104 @@
+<!doctype html>
+<html>
+    <head>
+        
+        <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+        <script src="{{ url_for('static', filename='js/d3.layout.cloud.js') }}"></script>
+    
+    </head>
+    <body>
+
+        <h1>A wordcloud for {{ username }}</h1>
+        <script>
+
+            var w = 600,
+                h = 600;
+            
+            var color_list = ['#407db5', '#e67e22',
+                                  '#27ae60', '#8e44ad',
+                                  '#e74c3c'];
+            
+            svg = d3.select("body")
+                    .append("svg")
+                    .attr("height", h)
+                    .attr("width", w);
+
+            svg.append("rect")
+                        .attr("width", "100%")
+                        .attr("height", "100%")
+                        .attr("fill", "#e0e0e0");
+
+
+            dataset = [];
+
+            {% for key, value in entries.iteritems() %}
+                var obj = {word:'{{ key }}',
+                        count: {{ value }} };
+                dataset.push(obj);
+            {% endfor %}
+
+
+            /*wordScale = d3.scale.pow()
+                    .domain(d3.extent(dataset, function(d) {
+                        return d.count;
+                    }))
+                    .rangeRound([10,60])
+                    .clamp(true);*/
+
+            wordScale = d3.scale.quantize()
+                    .domain(d3.extent(dataset, function(d) {
+                        return d.count;
+                    }))
+                    .range([20,30,40,50,60]);
+
+            
+            d3.layout.cloud()
+                .size([h,w])
+                .timeInterval(10)
+                .words(dataset)
+                .rotate( function(d) {
+                    return Math.random() > .5 ? 0 : -90;
+                })
+                .fontSize(function(d) { return wordScale(d.count);})
+                .padding(1)
+                .on("end", draw)
+                .start();
+        
+            function draw(words) {
+
+                var wordG = d3.select("svg")
+                                .append("g")
+                                .attr("id", "wordCloudG")
+                                .attr("transform", "translate(" + h/2 + "," + w/2 + ")");
+                
+                wordG.selectAll("text")
+                        .data(words)
+                        .enter()
+                        .append("text")
+                        .transition()
+                        .duration(1000)
+                        .style("font-size", function(d) { return d.size + "px"; })
+                        //.style("opacity", .75)
+                        .style("fill", function(d,i) {
+                            return color_list[i%5];
+                        })
+                        .attr("text-anchor", "middle")
+                        .attr("transform", function(d) {
+                            return "translate(" + [d.x,d.y] + ")rotate(" + d.rotate + ")";
+                        })
+                        .text(function(d) { return d.word; });
+            };
+        
+        d3.select("body")
+            .selectAll("p")
+            .data(dataset)
+            .enter()
+            .append("p")
+            .text(function(d) { return d.word + ' ' + d.count;});
+
+        </script>
+        
+
+        
+    </body>
+</html>
