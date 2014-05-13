@@ -56,7 +56,7 @@ var options = { numWords: 25,
                 path: 'kyle.csv'};
 
 //read_test_data(options, dataset);
-read_csv_data(options, fullData);
+//read_csv_data(options, fullData);
 
 /* 
 *   Reads in data from the csv located at the 
@@ -85,6 +85,15 @@ function read_csv_data(options, fullData) {
 *   construct the word cloud.
 */
 function build_cloud(options, fullData) {
+    trim_dataset(options, fullData);
+    initial_text_placement(options, dataset);
+    determine_text_boundaries(options, dataset);
+    cloud_placement_algorithm(options, dataset);
+    finalize_text_placement(options, dataset);
+}
+
+function update_cloud(options,fullData) {
+    d3.selectAll("text").remove();
     trim_dataset(options, fullData);
     initial_text_placement(options, dataset);
     determine_text_boundaries(options, dataset);
@@ -151,35 +160,36 @@ function initial_text_placement(options, dataset) {
 
     // Size of the SVG
     var dim = options.svgSize;
-
-    var svg = d3.select("body")
+    var svg;
+    
+    /*
+    *   If no SVG found, add it. Otherwise,
+    *   select it.
+    */
+    if (d3.select("svg").empty()) {
+        svg = d3.select("body")
             .append("svg")
-            .attr("height", dim)
-            .attr("width", dim);
-
-    // Background color, messes with checking bounding boxes
-    svg.append("rect")
-            .attr("width", "100%")
-            .attr("height", "100%")
-            .attr("fill", "#e0e0e0");
-
-
-    // Remove any current text items
-    svg.selectAll("text")
-        .transition()
-        .duration(500)
-        .attr("fill-opacity", 0)
-        .remove();
+                .attr("height", dim)
+                .attr("width", dim);
+        svg.append("rect")
+                .attr("width", "100%")
+                .attr("height", "100%")
+                .attr("fill", "#e0e0e0"); 
+    } else {
+        svg = d3.select("svg");
+    }
 
 
     // Create Text elements in random locations offscreen
     // Determine if it should be rotated
     // Add an ID and a color from the list
+    console.log("adding text: ", svg);
     var text = svg.selectAll("text")
             .data(dataset)
             .enter()
-            .append("text")
-            .text(function (d) {
+            .append("text");
+    
+    text.text(function (d) {
                 switch (options.fontCase) {
                 case "upper":
                     return d.word.toUpperCase();
@@ -228,11 +238,10 @@ function initial_text_placement(options, dataset) {
                 switch (options.font) {
                 case "helvetica":
                 case "times":
-                case "georgia":
-                case "verdana":
-                case "comfortaa":
-                case "raleway":
-                case "lato":
+                case "bariol_light":
+                case "bariol_thin":
+                case "bariol_regular":
+                case "bariol_bold":
                     return options.font;
                 default:
                     return "times";
@@ -247,7 +256,7 @@ function initial_text_placement(options, dataset) {
 *   detection.
 */
 function determine_text_boundaries(options, dataset) {
-
+    
     var text = d3.selectAll("text");
 
     text.each(function (d, i) {
@@ -295,7 +304,6 @@ function cloud_placement_algorithm(options, dataset) {
 *   Places words in a rectangular spiral,
 *   starting at the center of the SVG
 *   and spiraling counterclockwise.
-*   TODO - Maybe explain algorithm?
 */
 function rectangular_spiral(dataset) {
     // Rectangular Spiral Placement Algorithm
@@ -305,13 +313,13 @@ function rectangular_spiral(dataset) {
     // Current locations of all other Text elements
 
     var failed = [],
-        dim = d3.select("svg").node().getBoundingClientRect().width;
-
+        dim = options.svgSize;
+    
     for (i = 0; i < dataset.length; i++) {
         var x = 0,
             y = 0,
-            X = 80,
-            Y = 80,
+            X = 150,
+            Y = 150,
             dx = 0,
             dy = -1,
             loops = Math.pow(Math.max(X, Y), 2);
@@ -323,8 +331,8 @@ function rectangular_spiral(dataset) {
             if ((-X / 2 < x && x <= X / 2) && (-Y / 2 < y && y <= Y / 2)) {
                 // Place at 40% of width and 60% 
                 // of height. Seems to look good.
-                var xpos = dim * 0.4 + x * 5,
-                    ypos = dim * 0.6 + y * 5;
+                var xpos = dim * 0.4 + x * 3,
+                    ypos = dim * 0.6 + y * 3;
                 dataset[i].x = xpos;
                 dataset[i].y = ypos;
                 dataset[i].T = ypos - dataset[i].height;
@@ -354,8 +362,15 @@ function rectangular_spiral(dataset) {
                 }
             }
             
-            // TODO: Check if placement makes
-            // the word go out of the SVG
+            // Check if placement makes goes out
+            // of the SVG. If so, count as a collision.
+            if (!collision &&
+                (dataset[i].T <= 0 ||
+                dataset[i].B >= dim || 
+                dataset[i].L <= 0 ||
+                dataset[i].R >= dim)) {
+                collision = true;
+            }
             
             // If on the final loop, placement
             // has failed. Move it offscreen.
@@ -389,15 +404,168 @@ function rectangular_spiral(dataset) {
 *   Places words in an archimedean spiral,
 *   starting at the center of the SVG
 *   and spiraling clockwise.
-*   TODO - paste in algorithm
 */
 function archimedean_spiral(dataset) {
+    var failed = [],
+        dim = options.svgSize;
+    
+    for (i = 0; i < dataset.length; i++) {
+            loops = 2560;
+        
+        for(j = 0; j < loops; j++) {
+            
+            collision = false;
+            
+            // Find next placement along archimidean spiral
+            var angle = .05 * j;
+            var xpos = Math.floor(dim/2 + (1 + 2 * angle) * Math.cos(angle)),
+                ypos = Math.floor(dim/2 + (1 + 2 * angle) * Math.sin(angle));
+            dataset[i].x = xpos;
+            dataset[i].y = ypos;
+            dataset[i].T = ypos - dataset[i].height;
+            dataset[i].B = ypos;
+            dataset[i].L = xpos;
+            dataset[i].R = xpos + dataset[i].width;
+            
+            // Check for collisions
+            for (k = 0; k < dataset.length; k++) {
+                // Skip comparisons if we're comparing
+                // the same text element
+                if (k === i) {
+                    continue;
+                }
+                if (check_rectangle_intersect(dataset[i], dataset[k])) {
+                    collision = true;
+                    break;
+                }
+            }
+            
+            // Check if placement makes goes out
+            // of the SVG. If so, count as a collision.
+            if (!collision &&
+                (dataset[i].T <= 0 ||
+                dataset[i].B >= dim || 
+                dataset[i].L <= 0 ||
+                dataset[i].R >= dim)) {
+                collision = true;
+            }
+            
+            // If on the final loop, placement
+            // has failed. Move it offscreen.
+            if (j === (loops - 1)) {
+                dataset[i].x = -500;
+                dataset[i].y = -500;
+                failed.push(dataset[i]);
+            }
+            
+            // If a collision happened, reset
+            // the flag and restart the loop,
+            // otherwise stop the loop.
+            if (collision) {
+                collision = false;
+                continue;
+            } else {
+                break;
+            }
+            
+            
+            
+        }
+    }
+    // Log failed placements.
+    console.log("Failed Placements: ", failed.length, ": ", failed);
 }
 /*
 *   Places words randomly.
 *   TODO - paste in algorithm
 */
 function random_placement(dataset) {
+    var failed = [],
+        dim = options.svgSize;
+    
+    for (i = 0; i < dataset.length; i++) {
+        // Try 2000 placements
+        loops = 2000;
+        
+        // Store location of closest point to
+        // the center
+        var closest = {x: -1,
+                        y: -1,
+                        dist: 10000};
+        
+        for(j = 0; j < loops; j++) {
+            
+            collision = false;
+            
+            // Pick a random spot
+            var xpos = rand(0.15 * dim, 0.85 * dim),
+                ypos = rand(0.15 * dim, 0.85 * dim);
+            dataset[i].x = xpos;
+            dataset[i].y = ypos;
+            dataset[i].T = ypos - dataset[i].height;
+            dataset[i].B = ypos;
+            dataset[i].L = xpos;
+            dataset[i].R = xpos + dataset[i].width;
+            
+            // Check for collisions
+            for (k = 0; k < dataset.length; k++) {
+                // Skip comparisons if we're comparing
+                // the same text element
+                if (k === i) {
+                    continue;
+                }
+                if (check_rectangle_intersect(dataset[i], dataset[k])) {
+                    collision = true;
+                    break;
+                }
+            }
+            
+            // Check if placement makes goes out
+            // of the SVG. If so, count as a collision.
+            if (!collision &&
+                (dataset[i].T <= 0 ||
+                dataset[i].B >= dim || 
+                dataset[i].L <= 0 ||
+                dataset[i].R >= dim)) {
+                collision = true;
+            }
+            
+            // Calculate distance to "center"
+            var distance = Math.sqrt(Math.pow(dim * 0.4 - xpos, 2) + Math.pow(dim * 0.6 - ypos, 2))
+            
+            // If the has been no collision and this 
+            // position is closer than the previous
+            // closest, keep it
+            if (!collision && 
+                distance < closest.dist) {
+                closest.dist = distance;
+                closest.x = xpos;
+                closest.y = ypos;
+            }
+            
+            // If on the final loop, placement
+            // has failed. Move it offscreen.
+            if (j === (loops - 1) &&
+                closest.x === -1) {
+                dataset[i].x = -500;
+                dataset[i].y = -500;
+                failed.push(dataset[i]);
+            }
+            
+        }
+        
+        // Store the closest position
+        var xpos = closest.x,
+            ypos = closest.y;
+        dataset[i].x = xpos;
+        dataset[i].y = ypos;
+        dataset[i].T = ypos - dataset[i].height;
+        dataset[i].B = ypos;
+        dataset[i].L = xpos;
+        dataset[i].R = xpos + dataset[i].width;
+    }
+    // Log failed placements.
+    console.log("Failed Placements: ", failed.length, ": ", failed);
 }
 
 
@@ -422,13 +590,12 @@ function check_rectangle_intersect(rectA, rectB) {
 */
 function finalize_text_placement(options, dataset) {
     // Update and transition Text Elements to their proper locations
-
-    svg = d3.select("svg");
-
+    var svg = d3.select("svg");
+    console.log("final placement: ", svg);
     svg.selectAll("text")
             .data(dataset)
             .transition()
-            .delay(function(d, i) {return i / 10 * 100;})
+            //.delay(function(d, i) {return i / options.numWords * 50;})
             .duration(1000)
             .attr("transform", function(d) {
                 if (d.deg) {
@@ -437,7 +604,8 @@ function finalize_text_placement(options, dataset) {
                     newX = d.x;
                 }
                 return "translate(" + newX + "," + d.y + ")rotate(" + d.deg + ")";
-            });
+            })
+            .attr("fill-opacity", 1);
 }
 
 /*
