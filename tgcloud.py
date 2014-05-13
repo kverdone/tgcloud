@@ -20,6 +20,11 @@ def home():
     return redirect(url_for('home'))
   return render_template('index.html', form=form, name=session.get('name'))
 
+@app.route('/generate/<username>')
+def generate(username):
+  dict = wordlist(username)
+  return render_template('generate.html', username=username, entries=dict)
+
 @app.route('/user/<username>')
 def mycloud(username):
   return render_template('user.html', username=username.lower())

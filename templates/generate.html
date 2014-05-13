@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>TG Cloud</title>
+		<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+		<script src="{{ url_for('static', filename='js/kv-cloud.js') }}"></script>
+        <style>
+            @font-face { font-family: bariol_thin; src: url("{{ url_for('static', filename='Fonts/bariol_thin.ttf') }}");}
+            @font-face { font-family: bariol_light; src: url("{{ url_for('static', filename='Fonts/bariol_light.ttf') }}");}
+            @font-face { font-family: bariol_regular; src: url("{{ url_for('static', filename='Fonts/bariol_regular.ttf') }}");}
+            @font-face { font-family: bariol_bold; src: url("{{ url_for('static', filename='Fonts/bariol_bold.ttf') }}");}
+        </style>
+	</head>
+	<body>
+		<h1>Word Cloud for @{{ username }}</h1>
+        <div style="float:left">
+            Spiral:<br>
+            <form>
+                Rectangular<input type="radio" id="rectangular"><br>
+                Archimedean<input type="radio" id="archimedean"><br>
+                Random<input type="radio" id="random"><br>
+            </form>
+
+        </div>
+        <div style="float:left">
+            Layout:<br>
+            <form>
+                Mixed<input type="radio" id="mixed"><br>
+                Horizontal<input type="radio" id="horizontal"><br>
+                Vertical<input type="radio" id="vertical"><br>
+            </form>
+        </div>
+        <div>
+            <input id="update" type="button" value="update" onclick="update_cloud(options, fullData)"/>
+        </div>
+        <br><br><br><br>
+		<script>
+            
+            fullData = [];
+
+            {% for key, value in entries.iteritems() %}
+                var obj = {word:'{{ key }}',
+                        count: {{ value }} };
+                fullData.push(obj);
+            {% endfor %}
+
+            fullData.sort(compare);
+
+            options.numWords = 50;
+            options.font = "bariol_thin";
+            build_cloud(options, fullData);
+
+            d3.select("#rectangular").on("click", function () {
+                options.spiral = 'rectangular';
+            });
+            d3.select("#archimedean").on("click", function () {
+                options.spiral = 'rectangular';
+            });
+            d3.select("#random").on("click", function () {
+                options.spiral = 'rectangular';
+            });
+            d3.select("#mixed").on("click", function () {
+                options.wordAngle = 'mixed';
+            });
+            d3.select("#horizontal").on("click", function () {
+                options.wordAngle = 'horizontal';
+            });
+            d3.select("#vertical").on("click", function () {
+                options.wordAngle = 'vertical';
+            });
+            d3.select("#update").on("click", function () {
+                update_cloud(options, fulLData);
+            });
+        </script>
+	</body>
+</html>
