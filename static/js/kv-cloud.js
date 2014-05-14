@@ -85,6 +85,7 @@ function read_csv_data(options, fullData) {
 *   construct the word cloud.
 */
 function build_cloud(options, fullData) {
+    dataset = [];
     trim_dataset(options, fullData);
     initial_text_placement(options, dataset);
     determine_text_boundaries(options, dataset);
@@ -418,8 +419,8 @@ function archimedean_spiral(dataset) {
             
             // Find next placement along archimidean spiral
             var angle = .05 * j;
-            var xpos = Math.floor(dim/2 + (1 + 2 * angle) * Math.cos(angle)),
-                ypos = Math.floor(dim/2 + (1 + 2 * angle) * Math.sin(angle));
+            var xpos = Math.floor(dim * 0.4 + (1 + 2 * angle) * Math.cos(angle)),
+                ypos = Math.floor(dim * 0.6 + (1 + 2 * angle) * Math.sin(angle));
             dataset[i].x = xpos;
             dataset[i].y = ypos;
             dataset[i].T = ypos - dataset[i].height;

@@ -20,9 +20,9 @@ def home():
     return redirect(url_for('home'))
   return render_template('index.html', form=form, name=session.get('name'))
 
-@app.route('/generate/<username>')
-def generate(username):
-  dict = wordlist(username)
+@app.route('/generate/<username>/<num>')
+def generate(username, num):
+  dict = wordlist(username, num)
   return render_template('generate.html', username=username, entries=dict)
 
 @app.route('/user/<username>')
@@ -36,12 +36,12 @@ def recent(username):
 
 @app.route('/cloud/<username>')
 def jdcloud(username):
-  dict = wordlist(username)
+  dict = wordlist(username, 250)
   return render_template('jdcloud.html', username=username, entries=dict)
 
 @app.route('/<username>')
 def cloud(username):
-  dict = wordlist(username)
+  dict = wordlist(username, 250)
   return render_template('cloud.html', username=username, entries = dict)
 
 class NameForm(Form):
