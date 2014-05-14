@@ -13,7 +13,7 @@
 	</head>
 	<body>
 		<h1>Word Cloud for @{{ username }}</h1>
-        <div style="width:500px; height:110px;">
+        <div style="width:600px; height:110px;">
             <div style="float:left; margin-right:20px;">
                 <b>Placement:</b><br>
                 <form>
@@ -39,7 +39,14 @@
                     <input type="radio" name="font" id="bold">Bold<br>
                 </form>
             </div>
-            <div style="float:left; margin-top:30px;">
+            <div style="float:left; margin-right:20px;">
+                <b>Words:</b>
+                    <label for="numWords" style="text-align: right"> <span id="numWords-value">…</span>
+                    </label><br>
+                    <input type="range" min="1" max="100" id="numWords">
+            </div>
+            <div style="float:left;">
+                <b>Update:</b><br>
                 <input id="update" type="button" value="UPDATE" style="width:80px;height:40px;" onclick="update_cloud(options, fullData)"/>
             </div>
         </div>
@@ -55,12 +62,14 @@
 
             fullData.sort(compare);
 
-            options.numWords = 50;
             options.svgSize = 600;
             options.font = 'bariol_thin';
 
             build_cloud(options, fullData);
 
+
+            d3.select("#numWords-value").text(options.numWords);
+            d3.select("#numWords").property("value", options.numWords);
             d3.select("#rectangular").on("click", function () {
                 options.spiral = 'rectangular';
             });
@@ -90,6 +99,11 @@
             });
             d3.select("#bold").on("click", function () {
                 options.font = 'bariol_bold';
+            });
+            d3.select("#numWords").on("input", function() {
+                options.numWords = +this.value;
+                d3.select("#numWords-value").text(options.numWords);
+                d3.select("#numWords").property("value", options.numWords);
             });
 
 
