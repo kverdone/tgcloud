@@ -13,27 +13,36 @@
 	</head>
 	<body>
 		<h1>Word Cloud for @{{ username }}</h1>
-        <div style="float:left">
-            <b>Spiral:</b><br>
-            <form>
-                <input type="radio" name= "spiral" id="rectangular" checked>Rectangular<br>
-                <input type="radio" name= "spiral" id="archimedean">Archimedean<br>
-                <input type="radio" name= "spiral" id="random">Random<br>
-            </form>
-
+        <div style="width:500px; height:110px;">
+            <div style="float:left; margin-right:20px;">
+                <b>Placement:</b><br>
+                <form>
+                    <input type="radio" name= "placement" id="rectangular" checked>Rectangular<br>
+                    <input type="radio" name= "placement" id="archimedean">Spiral<br>
+                    <input type="radio" name= "placement" id="random">Random<br>
+                </form>
+            </div>
+            <div style="float:left; margin-right:20px;">
+                <b>Orientation:</b><br>
+                <form>
+                    <input type="radio" name="orientation" id="mixed" checked>Mixed<br>
+                    <input type="radio" name="orientation" id="horizontal">Horizontal<br>
+                    <input type="radio" name="orientation" id="vertical">Vertical<br>
+                </form>
+            </div>
+            <div style="float:left; margin-right:20px;">
+                <b>Font:</b><br>
+                <form>
+                    <input type="radio" name="font" id="thin" checked>Thin<br>
+                    <input type="radio" name="font" id="light">Light<br>
+                    <input type="radio" name="font" id="regular">Regular<br>
+                    <input type="radio" name="font" id="bold">Bold<br>
+                </form>
+            </div>
+            <div style="float:left; margin-top:30px;">
+                <input id="update" type="button" value="UPDATE" style="width:80px;height:40px;" onclick="update_cloud(options, fullData)"/>
+            </div>
         </div>
-        <div style="float:left">
-            <b>Orientation:</b><br>
-            <form>
-                <input type="radio" name="orientation" id="mixed" checked>Mixed<br>
-                <input type="radio" name="orientation" id="horizontal">Horizontal<br>
-                <input type="radio" name="orientation" id="vertical">Vertical<br>
-            </form>
-        </div>
-        <div>
-            <input id="update" type="button" value="update" onclick="update_cloud(options, fullData)"/>
-        </div>
-        <br><br><br><br>
 		<script>
             
             fullData = [];
@@ -47,7 +56,9 @@
             fullData.sort(compare);
 
             options.numWords = 50;
-            options.font = "bariol_regular";
+            options.svgSize = 600;
+            options.font = 'bariol_thin';
+
             build_cloud(options, fullData);
 
             d3.select("#rectangular").on("click", function () {
@@ -68,6 +79,19 @@
             d3.select("#vertical").on("click", function () {
                 options.wordAngle = 'vertical';
             });
+            d3.select("#thin").on("click", function () {
+                options.font = 'bariol_thin';
+            });
+            d3.select("#light").on("click", function () {
+                options.font = 'bariol_light';
+            });
+            d3.select("#regular").on("click", function () {
+                options.font = 'bariol_regular';
+            });
+            d3.select("#bold").on("click", function () {
+                options.font = 'bariol_bold';
+            });
+
 
         </script>
 	</body>

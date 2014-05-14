@@ -40,7 +40,7 @@ var dataset = [];
 **************************************************
 **************************************************/
 var options = { numWords: 25,
-                svgSize: 800,
+                svgSize: 600,
                 fontScale: "linear",
                 font: "times",
                 fontCase: "upper",
@@ -184,7 +184,6 @@ function initial_text_placement(options, dataset) {
     // Create Text elements in random locations offscreen
     // Determine if it should be rotated
     // Add an ID and a color from the list
-    console.log("adding text: ", svg);
     var text = svg.selectAll("text")
             .data(dataset)
             .enter()
@@ -532,7 +531,9 @@ function random_placement(dataset) {
             }
             
             // Calculate distance to "center"
-            var distance = Math.sqrt(Math.pow(dim * 0.4 - xpos, 2) + Math.pow(dim * 0.6 - ypos, 2))
+            var midx = dataset[i].R - dataset[i].L,
+                midy = dataset[i].B - dataset[i].T,
+                distance = Math.sqrt(Math.pow(dim * 0.4 - xpos, 2) + Math.pow(dim * 0.6 - ypos  , 2));
             
             // If the has been no collision and this 
             // position is closer than the previous
@@ -592,7 +593,6 @@ function check_rectangle_intersect(rectA, rectB) {
 function finalize_text_placement(options, dataset) {
     // Update and transition Text Elements to their proper locations
     var svg = d3.select("svg");
-    console.log("final placement: ", svg);
     svg.selectAll("text")
             .data(dataset)
             .transition()
