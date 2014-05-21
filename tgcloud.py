@@ -17,7 +17,7 @@ def login():
   form = LoginForm()
   if form.validate_on_submit():
     email = form.email.data
-    password = form.password.data`
+    password = form.password.data
     if email:
       if os.environ.get('EMAIL','kyle') == email and os.environ.get('PASS','guest') == password:
         login_user(User())
