@@ -4,29 +4,29 @@
 		<title>TG Cloud</title>
 	</head>
 	<body>
-		<h1><a href="/" style="text-decoration: none;">TG Cloud</a></h1>
+		<h1><a href="{{ url_for('index') }}" style="text-decoration: none;">TG Cloud</a></h1>
 
 		<p>To view a wordcloud, navigate to '/cloud/USERNAME/NUM_ENTRIES'<br>
 		View wordclouds for:</p>
 		<ul>
-			<li><a href="cloud/kyle/250">@kyle</a></li>
-			<li><a href="cloud/timi/250">@timi</a></li>
-			<li><a href="cloud/peter/250">@peter</a></li>
-			<li><a href="cloud/alex/250">@alex</a></li>
+			<li><a href="{{ url_for('generate') + 'kyle/250' }}">@kyle</a></li>
+			<li><a href="{{ url_for('generate') + 'timi/250' }}">@timi</a></li>
+			<li><a href="{{ url_for('generate') + 'peter/250' }}">@peter</a></li>
+			<li><a href="{{ url_for('generate') + 'alex/250' }}">@alex</a></li>
 		</ul>
 		<br>
 		<p>To view recent entries, navigate to '/recent/USERNAME' <br>
 		View recent entries for:</p>
 		<ul>
-			<li><a href="recent/kyle">@kyle</a></li>
-			<li><a href="recent/timi">@timi</a></li>
-			<li><a href="recent/peter">@peter</a></li>
-			<li><a href="recent/alex">@alex</a></li>
+			<li><a href="{{ url_for('recent') + 'kyle' }}">@kyle</a></li>
+			<li><a href="{{ url_for('recent') + 'timi' }}">@timi</a></li>
+			<li><a href="{{ url_for('recent') + 'peter' }}">@peter</a></li>
+			<li><a href="{{ url_for('recent') + 'alex' }}">@alex</a></li>
 		</ul>
 
 		<br><br>
 
-		<a href='logout'>Logout</a>
+		<a href="{{ url_for('logout') }}">Logout</a>
 
 
 	</body>
