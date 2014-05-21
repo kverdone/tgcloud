@@ -1,30 +1,27 @@
 <!DOCTYPE html>
-{% import "bootstrap/wtf.html" as wtf %}
 <html>
 	<head>
 		<title>TG Cloud</title>
 	</head>
 	<body>
 		<h1>TG Cloud</h1>
-		<p>View (sample) Word Clouds for:</p>
+		<p>To view a wordcloud, navigate to '/cloud/USERNAME/NUM_ENTRIES'<br>
+		View (sample) Word Clouds for:</p>
 		<ul>
-			<li><a href="user/kyle">kyle</a></li>
-			<li><a href="user/timi">timi</a></li>
-			<li><a href="user/peter">peter</a></li>
+			<li><a href="cloud/kyle">@kyle</a></li>
+			<li><a href="cloud/timi">@timi</a></li>
+			<li><a href="cloud/peter">@peter</a></li>
+			<li><a href="cloud/alex">@alex</a></li>
 		</ul>
 		<br>
-		<p>Recent entries for:</p>
+		<p>To view recent entries, navigate to '/recent/USERNAME' <br>
+		View recent entries for:</p>
 		<ul>
-			<li><a href="recent/kyle">kyle</a></li>
-			<li><a href="recent/timi">timi</a></li>
-			<li><a href="recent/peter">peter</a></li>
+			<li><a href="recent/kyle">@kyle</a></li>
+			<li><a href="recent/timi">@timi</a></li>
+			<li><a href="recent/peter">@peter</a></li>
+			<li><a href="recent/alex">@alex</a></li>
 		</ul>
-		
-		<br>
-		
-		<p>Hello, {% if name %}{{ name }}{% else %}Stranger{% endif %}!</p>
 
-
-		{{ wtf.quick_form(form) }}
 	</body>
 </html>
