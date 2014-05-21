@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>TG Cloud</title>
+	</head>
+	<body>
+		<h1><a href="/" style="text-decoration: none;">TG Cloud</a></h1>
+
+		<form method="POST" action="">
+			<dl>
+				{{ form.hidden_tag() }}
+				{{ form.email.label }} {{ form.email }}
+				{{ form.password.label }} {{ form.password }}
+				{{ form.submit }}
+			</dl>
+			<!--<p><input type=submit value=login></p>-->
+		</form>
+
+
+	</body>
+</html>
